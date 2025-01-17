@@ -1,9 +1,9 @@
 pipeline {
-    agent { 
+    agent {
         node {
             label 'docker-agent-1-python'
-            }
-      }
+        }
+    }
     triggers {
         pollSCM 'H/5 * * * *'
     }
@@ -13,6 +13,8 @@ pipeline {
                 echo "Building.."
                 sh '''
                 cd myapp
+                python3 -m venv venv
+                source venv/bin/activate
                 pip install -r requirements.txt
                 '''
             }
@@ -22,6 +24,7 @@ pipeline {
                 echo "Testing.."
                 sh '''
                 cd myapp
+                source venv/bin/activate
                 python3 hello.py
                 python3 hello.py --name=Brad
                 '''
@@ -36,4 +39,11 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            echo 'Cleaning up virtual environment...'
+            sh 'rm -rf myapp/venv'
+        }
+    }
 }
+
